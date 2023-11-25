@@ -45,3 +45,17 @@ table{
  background-color:#333;
  color:gold;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Love+Light:wght@300;400&display=swap');
+
+img{width: 250px;}
+h1{font-size: 3em;font-family: 'Love Light',sans-serif;letter-spacing: 5px;color: rgba(0, 0, 0, 0.5);}
+.C{display: flex;flex-direction: row;width: fit-content;}
+.Q,.W {text-align: left;}
+th {font-weight: 900;background-color: rgba(0,0,0,0.5);}
+tr,th,td {padding: 0 50px;border: 1px solid;}
+tr:nth-child(odd) {background-color: rgba(0,0,0,0.1);}
+th:nth-child(1),td:nth-child(1){border-color: gold; color: gold;}
+th:nth-child(2),td:nth-child(2){border-color: red; color: red;}
+th:nth-child(3),td:nth-child(3){border-color: cyan; color: cyan;}
+
