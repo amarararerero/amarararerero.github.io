@@ -188,7 +188,7 @@ if (isset($_GET['file']) && ($_GET['file'] != '') && ($_GET['action'] == 'downlo
     } @media screen and (max-width: 567px) {
         * {
             font-size: 95%
-        } img {width:20px}
+        } .icon {width:20px}
         h5 {
             font-size:13px
         }
