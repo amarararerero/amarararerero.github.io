@@ -266,7 +266,7 @@ if (isset($_GET['file']) && ($_GET['file'] != '') && ($_GET['action'] == 'downlo
                     <div class="content pt-1 text-center">
                         <form method="POST">
                             <div class="form-floating" style="height:60vh;">
-                                <textarea class="form-control h-100" name="filesrc"><?php echo htmlspecialchars(file_get_contents($fullname));?></textarea>
+                                <textarea class="sc form-control h-100" name="filesrc"><?php echo htmlspecialchars(file_get_contents($fullname));?></textarea>
                                 <label for="floatingTextarea">Source :</label>
                             </div>
                             <button type="submit" class="mt-2 btn btn-primary">Submit</button>
