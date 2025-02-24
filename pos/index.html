@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple POS</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: "Oswald", serif;
+            font-optical-sizing: auto;
+            font-weight: 700;
+            font-style: normal;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -194,29 +198,29 @@
 
         function loadProducts() {
             const products = [
-                { "id": 1, "name": "J Ayam", "price": 11.0, "color": "#FFB6C1" },
-                { "id": 2, "name": "J Daging", "price": 11.0, "color": "#FFB6C1" },
+                { "id": 1, "name": "J Ayam", "price": 11.0, "color": "#99485A" },
+                { "id": 2, "name": "J Daging", "price": 11.0, "color": "#99485A" },
                 { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" },
-                { "id": 3, "name": "J Special Ayam", "price": 13.0, "color": "#FFD700" },
-                { "id": 4, "name": "J Special Daging", "price": 13.0, "color": "#FFD700" },
+                { "id": 3, "name": "J Special Ayam", "price": 13.0, "color": "#B8860B" },
+                { "id": 4, "name": "J Special Daging", "price": 13.0, "color": "#B8860B" },
                 { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" },
-                { "id": 5, "name": "J Ustad Ayam", "price": 14.0, "color": "#B39CD0" },
-                { "id": 6, "name": "J Ustad Daging", "price": 14.0, "color": "#B39CD0" },
-                { "id": 7, "name": "J Ustad Kambing", "price": 14.0, "color": "#B39CD0" },
-                { "id": 8, "name": "J Grill Ayam", "price": 13.0, "color": "#F8E8A6" },
-                { "id": 9, "name": "J Grill Daging", "price": 13.0, "color": "#F8E8A6" },
-                { "id": 10, "name": "J Grill Kambing", "price": 25.0, "color": "#F8E8A6" },
-                { "id": 11, "name": "J Oblong Ayam", "price": 12.0, "color": "#FFDDC1" },
-                { "id": 12, "name": "J Oblong Daging", "price": 12.0, "color": "#FFDDC1" },
-                { "id": 13, "name": "J Oblong Kambing", "price": 15.0, "color": "#FFDDC1" },
-                { "id": 14, "name": "J Tuna", "price": 13.0, "color": "#D6CDEA" },
-                { "id": 15, "name": "J Seafood", "price": 13.0, "color": "#D6CDEA" },
-                { "id": 16, "name": "J Sardin", "price": 12.0, "color": "#D6CDEA" },
-                { "id": 17, "name": "J BMT", "price": 17.0, "color": "#D4A5A5" },
-                { "id": 18, "name": "J Ayam Goreng", "price": 13.0, "color": "#D4A5A5" },
-                { "id": 19, "name": "J MeatBall", "price": 13.0, "color": "#D4A5A5" },
-                { "id": 20, "name": "J Jujumbo", "price": 12.0, "color": "#B5EAD7" },
-                { "id": 21, "name": "J Triple Cheese", "price": 22.0, "color": "#B5EAD7" },
+                { "id": 5, "name": "J Ustad Ayam", "price": 14.0, "color": "#7A5A9C" },
+                { "id": 6, "name": "J Ustad Daging", "price": 14.0, "color": "#7A5A9C" },
+                { "id": 7, "name": "J Ustad Kambing", "price": 14.0, "color": "#7A5A9C" },
+                { "id": 8, "name": "J Grill Ayam", "price": 13.0, "color": "#A68C3D" },
+                { "id": 9, "name": "J Grill Daging", "price": 13.0, "color": "#A68C3D" },
+                { "id": 10, "name": "J Grill Kambing", "price": 25.0, "color": "#A68C3D" },
+                { "id": 11, "name": "J Oblong Ayam", "price": 12.0, "color": "#B97A59" },
+                { "id": 12, "name": "J Oblong Daging", "price": 12.0, "color": "#B97A59" },
+                { "id": 13, "name": "J Oblong Kambing", "price": 15.0, "color": "#B97A59" },
+                { "id": 14, "name": "J Tuna", "price": 13.0, "color": "#7865A8" },
+                { "id": 15, "name": "J Seafood", "price": 13.0, "color": "#7865A8" },
+                { "id": 16, "name": "J Sardin", "price": 12.0, "color": "#7865A8" },
+                { "id": 17, "name": "J BMT", "price": 17.0, "color": "#9C5B5B" },
+                { "id": 18, "name": "J Ayam Goreng", "price": 13.0, "color": "#9C5B5B" },
+                { "id": 19, "name": "J MeatBall", "price": 13.0, "color": "#9C5B5B" },
+                { "id": 20, "name": "J Jujumbo", "price": 12.0, "color": "#5A9C87" },
+                { "id": 21, "name": "J Triple Cheese", "price": 22.0, "color": "#5A9C87" },
                 { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" }
             ];
             const productList = document.getElementById('product-list');
