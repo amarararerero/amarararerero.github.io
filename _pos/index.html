@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple POS</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #1E1E1E;
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: 2.5em;
+            color: #FFFFFF;
+        }
+
+        .total {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #FFD700;
+        }
+
+        .product-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            justify-content: center;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .product {
+            background: #2E2E2E;
+            cursor: pointer;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            transition: background 0.3s;
+        }
+
+        .product:hover {
+            background: #3E3E3E;
+        }
+
+        .pName {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: #FFD700;
+            border: none;
+            border-radius: 5px;
+            color: #1E1E1E;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #FFA500;
+        }
+
+        #cart-sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 300px;
+            max-width: 80%;
+            height: 100%;
+            background: #2E2E2E;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #cart-sidebar.open {
+            transform: translateX(0);
+        }
+
+        #cart-sidebar h2 {
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        #cart-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        #cart-list li {
+            background: #3E3E3E;
+            border-radius: 5px;
+            margin: 5px 0;
+            padding: 10px;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button.clear, button.submit {
+            background: #FFD700;
+            color: #1E1E1E;
+            padding: 10px 20px;
+            margin: 10px 0;
+            font-size: 1em;
+        }
+
+        button.clear:hover, button.submit:hover {
+            background: #FFA500;
+        }
+
+        #cart-toggle, #cart-close {
+            background: #FFD700;
+            border: none;
+            border-radius: 5px;
+            color: #1E1E1E;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #cart-toggle:hover, #cart-close:hover {
+            background: #FFA500;
+        }
+
+        #cart-toggle {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+        }
+
+        #cart-close {
+            align-self: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .product-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple POS</h1>
+    <div class="total">Total: RM <span id="total">0.00</span></div>
+    <div class="product-container" id="product-list">
+        <!-- Products will be displayed here -->
+    </div>
+    <button id="cart-toggle" onclick="toggleCart()">Cart</button>
+    <div id="cart-sidebar">
+        <button id="cart-close" onclick="toggleCart()">Close</button>
+        <h2>Cart</h2>
+        <ul id="cart-list">
+            <!-- Cart items will be displayed here -->
+        </ul>
+        <button class="clear" onclick="clearCart()">Clear</button>
+        <button class="submit" onclick="submitCart()">Submit</button>
+    </div>
+    <script>
+        let total = 0;
+        let cart = {};
+        let submissionCounter = parseInt(localStorage.getItem('counter')) || 0;
+
+        function loadProducts() {
+            const products = [
+                { "id": 1, "name": "J Ayam", "price": 11.0, "color": "#FFB6C1" },
+                { "id": 2, "name": "J Daging", "price": 11.0, "color": "#FFB6C1" },
+                { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" },
+                { "id": 3, "name": "J Special Ayam", "price": 13.0, "color": "#FFD700" },
+                { "id": 4, "name": "J Special Daging", "price": 13.0, "color": "#FFD700" },
+                { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" },
+                { "id": 5, "name": "J Ustad Ayam", "price": 14.0, "color": "#B39CD0" },
+                { "id": 6, "name": "J Ustad Daging", "price": 14.0, "color": "#B39CD0" },
+                { "id": 7, "name": "J Ustad Kambing", "price": 14.0, "color": "#B39CD0" },
+                { "id": 8, "name": "J Grill Ayam", "price": 13.0, "color": "#F8E8A6" },
+                { "id": 9, "name": "J Grill Daging", "price": 13.0, "color": "#F8E8A6" },
+                { "id": 10, "name": "J Grill Kambing", "price": 25.0, "color": "#F8E8A6" },
+                { "id": 11, "name": "J Oblong Ayam", "price": 12.0, "color": "#FFDDC1" },
+                { "id": 12, "name": "J Oblong Daging", "price": 12.0, "color": "#FFDDC1" },
+                { "id": 13, "name": "J Oblong Kambing", "price": 15.0, "color": "#FFDDC1" },
+                { "id": 14, "name": "J Tuna", "price": 13.0, "color": "#D6CDEA" },
+                { "id": 15, "name": "J Seafood", "price": 13.0, "color": "#D6CDEA" },
+                { "id": 16, "name": "J Sardin", "price": 12.0, "color": "#D6CDEA" },
+                { "id": 17, "name": "J BMT", "price": 17.0, "color": "#D4A5A5" },
+                { "id": 18, "name": "J Ayam Goreng", "price": 13.0, "color": "#D4A5A5" },
+                { "id": 19, "name": "J MeatBall", "price": 13.0, "color": "#D4A5A5" },
+                { "id": 20, "name": "J Jujumbo", "price": 12.0, "color": "#B5EAD7" },
+                { "id": 21, "name": "J Triple Cheese", "price": 22.0, "color": "#B5EAD7" },
+                { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" }
+            ];
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = products.map(product => `
+                <div class="product" style="background: ${product.color}" onclick="updateCart('${product.name}', ${product.price}, 1)">
+                    <span class="pName">${product.name}</span>
+                    <div>
+                        <span id="${product.name}-count">0</span>
+                    </div>
+                </div>
+            `).join('');
+            localStorage.setItem('products', JSON.stringify(products));
+        }
+
+        function updateCart(productName, price, quantity) {
+            cart[productName] = (cart[productName] || 0) + quantity;
+            if (cart[productName] < 0) cart[productName] = 0;
+            updateTotal(price * quantity);
+            document.getElementById(`${productName}-count`).textContent = cart[productName];
+            updateCartList();
+        }
+
+        function updateTotal(price) {
+            total += price;
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+
+        function updateCartList() {
+            const cartList = document.getElementById('cart-list');
+            cartList.innerHTML = Object.entries(cart)
+                .filter(([_, count]) => count > 0)
+                .map(([product, count]) => `
+                    <li>
+                        ${product}: ${count}
+                        <button onclick="updateCart('${product}', ${getProductPrice(product)}, -1)">-</button>
+                    </li>
+                `).join('');
+        }
+
+        function getProductPrice(productName) {
+            const products = JSON.parse(localStorage.getItem('products'));
+            const product = products.find(p => p.name === productName);
+            return product ? product.price : 0;
+        }
+
+        function clearCart() {
+            total = 0;
+            cart = {};
+            document.getElementById('total').textContent = total.toFixed(2);
+            updateCartList();
+            document.querySelectorAll('[id$="-count"]').forEach(span => span.textContent = '0');
+        }
+
+        function submitCart() {
+            const dateKey = new Date().toISOString().split('T')[0];
+            submissionCounter++;
+            localStorage.setItem(`cart_${dateKey}_${submissionCounter}`, JSON.stringify(cart));
+            localStorage.setItem('counter', submissionCounter);
+            alert('Cart submitted and stored in local storage.');
+            clearCart();
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-sidebar').classList.toggle('open');
+        }
+
+        function closeCart() {
+            document.getElementById('cart-sidebar').classList.remove('open');
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>
