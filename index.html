@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/5562/5562272.png">
+    <link rel="icon" type="image/x-icon" href="sigma.jpeg">
     <title>BamBaClyat John</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
@@ -22,16 +22,14 @@
             height: 100vh;
         }
 
-        h1 {
-            margin: 20px 0;
-            font-size: 2.5em;
-            color: #FFFFFF;
-        }
-
         .total {
             font-size: 1.5em;
             margin: 20px 0;
             color: #FFD700;
+            background-color: #1E1E1E;
+            position: sticky;
+            top: 0;
+            left: 0;
         }
 
         .product-container {
@@ -54,6 +52,7 @@
             align-items: center;
             height: 100px;
             transition: background 0.3s;
+            padding: 0 3px;
         }
 
         .product:hover {
@@ -164,6 +163,9 @@
         }
 
         @media (max-width: 768px) {
+            body{
+                font-size: 0.95em;
+            }
             .product-container {
                 grid-template-columns: repeat(3, 1fr);
             }
@@ -177,7 +179,6 @@
     </style>
 </head>
 <body>
-    <h1>BamBaClyat John</h1>
     <div class="total">Total: RM <span id="total">0.00</span></div>
     <div class="product-container" id="product-list">
         <!-- Products will be displayed here -->
@@ -199,30 +200,33 @@
 
         function loadProducts() {
             const products = [
-                { "id": 1, "name": "J Ayam", "price": 11.0, "color": "#99485A" },
-                { "id": 2, "name": "J Daging", "price": 11.0, "color": "#99485A" },
-                { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" },
-                { "id": 3, "name": "J Special Ayam", "price": 13.0, "color": "#B8860B" },
-                { "id": 4, "name": "J Special Daging", "price": 13.0, "color": "#B8860B" },
-                { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" },
-                { "id": 5, "name": "J Ustad Ayam", "price": 14.0, "color": "#7A5A9C" },
-                { "id": 6, "name": "J Ustad Daging", "price": 14.0, "color": "#7A5A9C" },
-                { "id": 7, "name": "J Ustad Kambing", "price": 14.0, "color": "#7A5A9C" },
-                { "id": 8, "name": "J Grill Ayam", "price": 13.0, "color": "#A68C3D" },
-                { "id": 9, "name": "J Grill Daging", "price": 13.0, "color": "#A68C3D" },
-                { "id": 10, "name": "J Grill Kambing", "price": 25.0, "color": "#A68C3D" },
-                { "id": 11, "name": "J Oblong Ayam", "price": 12.0, "color": "#B97A59" },
-                { "id": 12, "name": "J Oblong Daging", "price": 12.0, "color": "#B97A59" },
-                { "id": 13, "name": "J Oblong Kambing", "price": 15.0, "color": "#B97A59" },
-                { "id": 14, "name": "J Tuna", "price": 13.0, "color": "#7865A8" },
-                { "id": 15, "name": "J Seafood", "price": 13.0, "color": "#7865A8" },
-                { "id": 16, "name": "J Sardin", "price": 12.0, "color": "#7865A8" },
-                { "id": 17, "name": "J BMT", "price": 17.0, "color": "#9C5B5B" },
-                { "id": 18, "name": "J Ayam Goreng", "price": 13.0, "color": "#9C5B5B" },
-                { "id": 19, "name": "J MeatBall", "price": 13.0, "color": "#9C5B5B" },
-                { "id": 20, "name": "J Jujumbo", "price": 12.0, "color": "#5A9C87" },
-                { "id": 21, "name": "J Triple Cheese", "price": 22.0, "color": "#5A9C87" },
-                { "id": -1, "name": "-", "price": null, "color": "#2E2E2E" }
+                { "id": 1,  "name": "J Ayam",           "price": 11.0, "color": "#99485A" }, /* [/] */
+                { "id": 2,  "name": "J Daging",         "price": 11.0, "color": "#99485A" }, /* [/] */
+                { "id": -1, "name": "-",                "price": null, "color": "#2E2E2E" }, /* [/] */
+                { "id": 3,  "name": "J Special Ayam",   "price": 13.0, "color": "#B8860B" }, /* [/] */
+                { "id": 4,  "name": "J Special Daging", "price": 13.0, "color": "#B8860B" }, /* [/] */
+                { "id": -1, "name": "J Special Kambing","price": 27.0, "color": "#B8860B" }, /* [/] */
+                { "id": 5,  "name": "J Ust Ayam",       "price": 14.0, "color": "#7A5A9C" }, /* [/] */
+                { "id": 6,  "name": "J Ust Daging",     "price": 14.0, "color": "#7A5A9C" }, /* [/] */
+                { "id": 7,  "name": "J Ust Kambing",    "price": 28.0, "color": "#7A5A9C" }, /* [/] */
+                { "id": 8,  "name": "J Grill Ayam",     "price": 13.0, "color": "#A68C3D" }, /* [/] */
+                { "id": 9,  "name": "J Grill Daging",   "price": 13.0, "color": "#A68C3D" }, /* [/] */
+                { "id": 10, "name": "J Grill Kambing",  "price": 25.0, "color": "#A68C3D" }, /* [/] */
+                { "id": 11, "name": "J Oblong Ayam",    "price": 12.0, "color": "#B97A59" }, /* [/] */
+                { "id": 12, "name": "J Oblong Daging",  "price": 12.0, "color": "#B97A59" }, /* [/] */
+                { "id": 13, "name": "J Oblong Kambing", "price": 15.0, "color": "#B97A59" }, /* [/] */
+                { "id": 14, "name": "J Tuna",           "price": 13.0, "color": "#7865A8" }, /* [/] */
+                { "id": 15, "name": "J Seafood",        "price": 13.0, "color": "#7865A8" }, /* [/] */
+                { "id": 16, "name": "J Sardin",         "price": 11.0, "color": "#7865A8" }, /* [/] */
+                { "id": 18, "name": "J Ayam Goreng",    "price": 13.0, "color": "#9C5B5B" }, /* [/] */
+                { "id": 17, "name": "J BMT",            "price": 17.0, "color": "#9C5B5B" }, /* [/] */
+                { "id": 19, "name": "J MeatBall",       "price": 13.0, "color": "#9C5B5B" }, /* [/] */
+                { "id": 20, "name": "J Jujumbo",        "price": 13.0, "color": "#5A9C87" }, /* [/] */
+                { "id": 21, "name": "J Triple Cheese",  "price": 22.0, "color": "#5A9C87" }, /* [/] */
+                { "id": -1, "name": "-",                "price": null, "color": "#2E2E2E" }, /* [/] */
+                { "id": 21, "name": "Tambah Telur",     "price": 2.0 , "color": "#5A9C87" }, /* [/] */
+                { "id": 21, "name": "Tambah Sosej",     "price": 3.0 , "color": "#5A9C87" }, /* [/] */
+                { "id": -1, "name": "-",                "price": null, "color": "#2E2E2E" }  /* [/] */
             ];
             const productList = document.getElementById('product-list');
             productList.innerHTML = products.map(product => `
