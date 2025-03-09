@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Dongle&display=swap" rel="stylesheet">
+    <title>John Inventory</title>
+    <style>
+        body {
+            font-family: 'Dongle', sans-serif;
+            padding: 20px;
+            text-align: center;
+            background-color: #1c1c1c;
+            color: #e0e0e0;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #444;
+            padding: 12px;
+            text-align: center;
+            font-size: 25px;
+        }
+
+        th {
+            background-color: #444;
+            font-weight: 600;
+        }
+
+        input {
+            width: 80%;
+            padding: 6px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #555;
+            border-radius: 4px;
+            margin: 5px 0;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        .final-total-row {
+            font-weight: bold;
+            background-color: #ffeb3b;
+            color: #000;
+        }
+
+        .add-john-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .add-john-container input {
+            width: 200px;
+        }
+
+        .add-john-container button {
+            padding: 10px 15px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .add-john-container button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                font-size: 20px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            input {
+                font-size: 10px;
+                padding: 6px;
+            }
+
+            .add-john-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>John Inventory</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>John Type</th>
+                <th>Board 1</th>
+                <th>Total Board 1</th>
+                <th>Board 2</th>
+                <th>Total Board 2</th>
+                <th>Final Total</th>
+            </tr>
+        </thead>
+        <tbody id="johnTable">
+            <!-- Rows will be generated dynamically -->
+        </tbody>
+        <tfoot>
+            <tr class="final-total-row">
+                <td colspan="5">Actual Final Total</td>
+                <td id="actualFinalTotal">0</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="add-john-container">
+        <input type="text" id="newJohnName" placeholder="Enter John Type (e.g. JDC)">
+        <button onclick="addNewJohn()">+ Add John</button>
+    </div>
+
+    <script>
+        const johnTypes = [
+            "J A", "J D","J UA", "J UD", "J UK", "J GA", "J GD", "J GK", "J OA", "J OD", "J OK","J JJ", "J MB", "J AG", "J SA", "J SD", "J T", "J SF", "J SR", "J BMT", "J TCA", "J TDC"];
+
+        const tableBody = document.getElementById("johnTable");
+        const actualFinalTotalEl = document.getElementById("actualFinalTotal");
+
+        function createJohnRow(john) {
+            let row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${john}</td>
+                <td><input type="text" class="board1-input" placeholder="10,15,5"></td>
+                <td class="board1-total">0</td>
+                <td><input type="text" class="board2-input" placeholder="10,15,5"></td>
+                <td class="board2-total">0</td>
+                <td class="final-total">0</td>
+            `;
+
+            tableBody.appendChild(row);
+        }
+
+        function loadJohns() {
+            johnTypes.forEach(john => createJohnRow(john));
+        }
+
+        function calculateTotals() {
+            let actualFinalTotal = 0;
+
+            document.querySelectorAll("#johnTable tr").forEach(row => {
+                let board1Input = row.querySelector(".board1-input").value;
+                let board2Input = row.querySelector(".board2-input").value;
+
+                let board1Total = board1Input ? board1Input.split(",").reduce((sum, num) => sum + Number(num.trim()), 0) : 0;
+                let board2Total = board2Input ? board2Input.split(",").reduce((sum, num) => sum + Number(num.trim()), 0) : 0;
+
+                row.querySelector(".board1-total").innerText = board1Total;
+                row.querySelector(".board2-total").innerText = board2Total;
+                let finalTotal = board1Total + board2Total;
+                row.querySelector(".final-total").innerText = finalTotal;
+
+                actualFinalTotal += finalTotal;
+            });
+
+            actualFinalTotalEl.innerText = actualFinalTotal;
+        }
+
+        function addNewJohn() {
+            const newJohnName = document.getElementById("newJohnName").value.trim().toUpperCase();
+
+            if (newJohnName === "" || johnTypes.includes(newJohnName)) {
+                alert("Invalid or duplicate John name!");
+                return;
+            }
+
+            johnTypes.push(newJohnName);
+            createJohnRow(newJohnName);
+            document.getElementById("newJohnName").value = "";
+        }
+
+        document.addEventListener("input", calculateTotals);
+        loadJohns();
+    </script>
+
+</body>
+</html>
