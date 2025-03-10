@@ -86,6 +86,31 @@
             background-color: #0056b3;
         }
 
+        .section-divider {
+            border-top: 2px solid #ffeb3b;
+            margin: 20px 0;
+        }
+
+        .section2 {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .section2 table {
+            border-collapse: collapse;
+            background: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .section2 th{
+            border: 1px solid #777;
+            text-align: left;
+            font-size: 25px;
+            background-color: #444;
+            font-weight: 600;
+            width: 280px;
+        }
         @media (max-width: 768px) {
             table {
                 font-size: 20px;
@@ -104,6 +129,10 @@
                 flex-direction: column;
                 align-items: center;
             }
+            .section2 {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -116,9 +145,9 @@
             <tr>
                 <th>John Type</th>
                 <th>Board 1</th>
-                <th>Total Board 1</th>
+                <th>Total B1</th>
                 <th>Board 2</th>
-                <th>Total Board 2</th>
+                <th>Total B2</th>
                 <th>Final Total</th>
             </tr>
         </thead>
@@ -126,10 +155,16 @@
             <!-- Rows will be generated dynamically -->
         </tbody>
         <tfoot>
-            <tr class="final-total-row">
-                <td colspan="5">Actual Final Total</td>
-                <td id="actualFinalTotal">0</td>
-            </tr>
+            <table>
+                <tr class="final-total-row">
+                    <td>Total B1</td>
+                    <td id="totalB1">0</td>
+                    <td>Total B2</td>
+                    <td id="totalB2">0</td>
+                    <td>Final Sum</td>
+                    <td id="actualFinalTotal">0</td>
+                </tr>
+            </table>
         </tfoot>
     </table>
 
@@ -137,13 +172,19 @@
         <input type="text" id="newJohnName" placeholder="Enter John Type (e.g. JDC)">
         <button onclick="addNewJohn()">+ Add John</button>
     </div>
+    <br>
+    <button onclick="summarizeAndCopy()">Summarize & Copy</button>
 
     <script>
         const johnTypes = [
-            "J A", "J D","J UA", "J UD", "J UK", "J GA", "J GD", "J GK", "J OA", "J OD", "J OK","J JJ", "J MB", "J AG", "J SA", "J SD", "J T", "J SF", "J SR", "J BMT", "J TCA", "J TDC"];
+            "J Aㅤ", "J Dㅤ","J UA\t", "J UD\t", "J UK\t", "J GA\t", "J GD\t", "J GK\t", 
+            "J OA", "J OD\t", "J OK\t","J JJ\t", "J MB\t", "J AG\t", "J SA\t", "J SD\t", 
+            "JTUN", "JSEA", "JSAR", "JBMT", "JTCA", "JTDC"];
 
         const tableBody = document.getElementById("johnTable");
         const actualFinalTotalEl = document.getElementById("actualFinalTotal");
+        const totalB1El = document.getElementById("totalB1");
+        const totalB2El = document.getElementById("totalB2");
 
         function createJohnRow(john) {
             let row = document.createElement("tr");
@@ -166,7 +207,9 @@
 
         function calculateTotals() {
             let actualFinalTotal = 0;
-
+            let total_B1 = 0;
+            let total_B2 = 0;
+            
             document.querySelectorAll("#johnTable tr").forEach(row => {
                 let board1Input = row.querySelector(".board1-input").value;
                 let board2Input = row.querySelector(".board2-input").value;
@@ -176,6 +219,10 @@
 
                 row.querySelector(".board1-total").innerText = board1Total;
                 row.querySelector(".board2-total").innerText = board2Total;
+            
+                total_B1 += board1Total;
+                total_B2 += board2Total;
+
                 let finalTotal = board1Total + board2Total;
                 row.querySelector(".final-total").innerText = finalTotal;
 
@@ -183,6 +230,8 @@
             });
 
             actualFinalTotalEl.innerText = actualFinalTotal;
+            totalB1El.innerText = total_B1;
+            totalB2El.innerText = total_B2;
         }
 
         function addNewJohn() {
@@ -198,8 +247,111 @@
             document.getElementById("newJohnName").value = "";
         }
 
+        function whitespace(total) {
+            if (total > 10) {
+                return "\t\t\t";
+            } else if (total > 100) {
+                return "\t";
+            } else {
+                return "\t\t\t\t";
+            }
+        }
+
+        function summarizeAndCopy() {
+            let summary = "```Type\t|Board1\t|Board2\t|Sum\n";
+            document.querySelectorAll("#johnTable tr").forEach(row => {
+                let johnType = row.querySelector("td:first-child").innerText;
+                let board1Total = row.querySelector(".board1-total").innerText;
+                let board2Total = row.querySelector(".board2-total").innerText;
+                let finalTotal = row.querySelector(".final-total").innerText;
+                summary += `${johnType}\t|${board1Total}${whitespace(board1Total)}|${board2Total}${whitespace(board2Total)}|${finalTotal}\n`;
+            });
+
+            let finalTotalSum = document.getElementById("actualFinalTotal").innerText;
+            summary += `\nFinal Total = ${finalTotalSum}\`\`\``;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(summary).then(() => {
+                    alert("Summary copied to clipboard!");
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(summary);
+                });
+            } else {
+                fallbackCopyTextToClipboard(summary);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert("Summary copied to clipboard!");
+            } catch (err) {
+                alert("Failed to copy summary: " + err);
+            }
+            document.body.removeChild(textArea);
+        }
+
         document.addEventListener("input", calculateTotals);
         loadJohns();
+    </script>
+
+    <div class="section-divider"></div>
+    <div class="section2">
+        <table>
+            <tr>
+                <th>Total Before Open (O)</th>
+                <td><input type="number" id="totalBeforeOpen" placeholder="Enter total before open" oninput="calculateBalances()"></td>
+            </tr>
+            <tr>
+                <th>Total After Close (C)</th>
+                <td><input type="number" id="totalAfterClose" placeholder="Enter total after close" oninput="calculateBalances()"></td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <th>Total Balance (B = O - T)</th>
+                <td id="breadsBalance">0</td>
+            </tr>
+            <tr>
+                <th>Breads That Disappear (D = B - A)</th>
+                <td id="breadsDisappear">0</td>
+            </tr>
+            <tr>
+                <th>Conclusion</th>
+                <td id="conclusionText">Everything seems balanced.</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function calculateBalances() {
+            let BeforeUse = Number(document.getElementById("totalBeforeOpen").value) || 0;
+            let AfterUse = Number(document.getElementById("totalAfterClose").value) || 0;
+            let SummedUp = Number(document.getElementById("actualFinalTotal").innerText) || 0;
+
+            let BalanceMustHave = BeforeUse - SummedUp;
+            let Differences = AfterUse - BalanceMustHave;
+
+            document.getElementById("breadsBalance").innerText = BalanceMustHave;
+            document.getElementById("breadsDisappear").innerText = Differences;
+
+            let conclusion = "";
+            if (Differences > 0) {
+                conclusion = "Maybe written more??";
+            } else if (Differences < 0) {
+                conclusion = "There are some breads disappear ??";
+            } else {
+                conclusion = "Everything seems balanced.";
+            }
+            document.getElementById("conclusionText").innerText = conclusion;
+        }
+
+        
     </script>
 
 </body>
