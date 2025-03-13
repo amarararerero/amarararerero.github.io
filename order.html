@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Sorting Process</title>
+    <style>
+        body {
+            background-color: #181818;
+            color: #e0e0e0;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            font-size: 14px; /* Smaller font size */
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 10px; /* Adjusted padding */
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+        }
+        .input-section {
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 8px; /* Adjusted padding */
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px; /* Smaller font size */
+        }
+        input {
+            background: #333;
+            color: #fff;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        h1, h2 {
+            color: #f5f5f5;
+        }
+        .divider {
+            border-top: 2px solid #4CAF50;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+
+            table, th, td {
+                font-size: 12px; /* Smaller font size for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Sorting Process</h1>
+        <div class="input-section">
+            <input type="text" id="rider" placeholder="Enter Rider Name">
+            <button onclick="addRider()">Add Rider</button>
+        </div>
+        <div id="riderTables"></div>
+        <div class="divider"></div>
+        <h2>Total Orders by Type</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>John Type</th>
+                    <th>Total Quantity</th>
+                </tr>
+            </thead>
+            <tbody id="summaryTableBody">
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Final Total</strong></td>
+                    <td id="finalTotal"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <script>
+        let orders = [];
+        let frontKitchenJohnTypes = ["J Aㅤ", "J Dㅤ", "J UA\t", "J UD\t", "J UK\t", "J GA\t", "J GDㅤ", "J GKㅤ","J SA\t", "J SD\t" ];
+        let backKitchenJohnTypes = ["J OA", "J OD\t", "J OK\t", "J JJ\t", "J MB\t", "J AG\t","JTUN", "JSEA", "JSAR", "JBMT", "JTCA", "JTDC"];
+        
+        function addRider() {
+            let rider = document.getElementById("rider").value.trim();
+            if (!rider) {
+                alert("Please enter a Rider Name.");
+                return;
+            }
+            let locationNumber = orders.filter(o => o.rider === rider).length + 1;
+            
+            let newOrder = {
+                rider: rider,
+                location: `Location ${locationNumber}`,
+                johns: {},
+                specialOrders: {}
+            };
+            frontKitchenJohnTypes.concat(backKitchenJohnTypes).forEach(john => {
+                newOrder.johns[john] = 0;
+                newOrder.specialOrders[john] = false;
+            });
+            orders.push(newOrder);
+            
+            document.getElementById("rider").value = "";
+            renderTables();
+        }
+        
+        function updateQuantity(index, johnType, value) {
+            let quantity = parseInt(value) || 0;
+            orders[index].johns[johnType] = quantity;
+            renderTables();
+        }
+
+        function toggleSpecialOrder(index, johnType) {
+            orders[index].specialOrders[johnType] = !orders[index].specialOrders[johnType];
+            renderTables();
+        }
+        
+        function renderTables() {
+            let riderTables = document.getElementById("riderTables");
+            riderTables.innerHTML = "";
+            
+            orders.forEach((order, index) => {
+                let totalQuantity = frontKitchenJohnTypes.concat(backKitchenJohnTypes).reduce((sum, johnType) => sum + order.johns[johnType], 0);
+                let table = `<h2>${order.rider} - ${order.location}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>John Type</th>
+                            <th>Quantity</th>
+                            <th>Special Order</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
+                table += `<tr>
+                    <td colspan="3"><strong>Front Kitchen</strong></td>
+                </tr>`;
+                
+                frontKitchenJohnTypes.forEach(johnType => {
+                    table += `<tr>
+                        <td>${johnType}</td>
+                        <td><input type='number' min='0' value='${order.johns[johnType]}' onchange='updateQuantity(${index}, "${johnType}", this.value)' onfocus='this.select()'></td>
+                        <td><input type='checkbox' ${order.specialOrders[johnType] ? "checked" : ""} onchange='toggleSpecialOrder(${index}, "${johnType}")'></td>
+                    </tr>`;
+                });
+                
+                table += `<tr>
+                    <td colspan="3"><strong>Back Kitchen</strong></td>
+                </tr>`;
+                
+                backKitchenJohnTypes.forEach(johnType => {
+                    table += `<tr>
+                        <td>${johnType}</td>
+                        <td><input type='number' min='0' value='${order.johns[johnType]}' onchange='updateQuantity(${index}, "${johnType}", this.value)' onfocus='this.select()'></td>
+                        <td><input type='checkbox' ${order.specialOrders[johnType] ? "checked" : ""} onchange='toggleSpecialOrder(${index}, "${johnType}")'></td>
+                    </tr>`;
+                });
+                
+                table += `<tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>${totalQuantity}</strong></td>
+                    <td></td>
+                </tr>`;
+                
+                table += `</tbody></table>`;
+                riderTables.innerHTML += table;
+            });
+            renderSummary();
+        }
+        
+        function renderSummary() {
+            let summaryBody = document.getElementById("summaryTableBody");
+            summaryBody.innerHTML = "";
+            let summary = {};
+            let finalTotal = 0;
+            
+            frontKitchenJohnTypes.concat(backKitchenJohnTypes).forEach(john => summary[john] = 0);
+            
+            orders.forEach(order => {
+                for (let johnType of frontKitchenJohnTypes.concat(backKitchenJohnTypes)) {
+                    summary[johnType] += order.johns[johnType];
+                }
+            });
+            
+            for (let johnType in summary) {
+                let row = `<tr>
+                    <td>${johnType}</td>
+                    <td>${summary[johnType]}</td>
+                </tr>`;
+                summaryBody.innerHTML += row;
+                finalTotal += summary[johnType];
+            }
+            
+            document.getElementById("finalTotal").innerText = finalTotal;
+        }
+    </script>
+</body>
+</html>
