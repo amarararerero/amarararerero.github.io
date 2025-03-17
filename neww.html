@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Dongle&display=swap" rel="stylesheet">
+    <title>John Inventory</title>
+    <style>
+        body {
+            font-family: 'Dongle', sans-serif;
+            text-align: center;
+            background-color: #1c1c1c;
+            color: #e0e0e0;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            background-color: #ff9900;
+            color: white;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .section1 thead tr th{
+            border: #000 solid 1px;
+            text-align: center;
+            font-size: 25px;   
+            padding: 5px;
+        }
+        th, td {
+            border: 1px solid #444;
+            text-align: center;
+            font-size: 25px;
+        }
+
+        th {
+            background-color: #444;
+            font-weight: 600;
+        }
+
+        input {
+            width: 80%;
+            padding: 6px;
+            margin:5px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        .final-total-row {
+            font-weight: bold;
+            background-color: #ffeb3b;
+            color: #000;
+        }
+
+        .add-john-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .add-john-container input {
+            width: 200px;
+        }
+
+        .add-john-container button {
+            padding: 10px 15px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            background-color: #ff9900;
+            color: white;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .add-john-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .section-divider {
+            border-top: 2px solid #ffeb3b;
+            margin: 20px 0;
+        }
+
+        .section2 {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .section2 table {
+            border-collapse: collapse;
+            background: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .section2 th{
+            border: 1px solid #777;
+            text-align: left;
+            font-size: 25px;
+            background-color: #444;
+            font-weight: 600;
+            width: 280px;
+        }
+        select {
+            padding: 10px;
+            font-size: 15px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        select:hover {
+            background-color: #444;
+            color: #ffffff;
+        }
+
+        option {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        option:hover {
+            background-color: #444;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="section1">
+        <h2>John Inventory</h2>
+        <button onclick="storeProgress()">Store</button>
+        <button onclick="resumeProgress()">Resume</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Johnss</th>
+                    <th>Board 1</th>
+                    <th>Total1</th>
+                    <th>Board 2</th>
+                    <th>Total2</th>
+                    <th>FinalTotal</th>
+                </tr>
+            </thead>
+            <tbody id="johnTable">
+                <!-- Rows will be generated dynamically -->
+            </tbody>
+            <tfoot>
+                <table>
+                    <tr class="final-total-row">
+                        <td>Total B1</td>
+                        <td id="totalB1">0</td>
+                        <td>Total B2</td>
+                        <td id="totalB2">0</td>
+                        <td>Final Sum</td>
+                        <td id="actualFinalTotal">0</td>
+                    </tr>
+                </table>
+            </tfoot>
+        </table>
+
+        <div class="add-john-container">
+            <input type="text" id="newJohnName" placeholder="Enter John Type (e.g. JDC)">
+            <button onclick="addNewJohn()">+ Add John</button>
+        </div>
+        <br>
+        <button onclick="summarizeAndCopy()">Summarize & Copy</button>
+
+        <script>
+            const johnTypes = [
+                "J A", "J D","J UA", "J UD", "J UK", "J GA", "J GD", "J GK", 
+                "J OA", "J OD", "J OK","J JJ", "J MB", "J AG", "J SA", "J SD", 
+                "JTUN", "JSEA", "JSAR", "JBMT", "JTCA", "JTDC"];
+
+            const tableBody = document.getElementById("johnTable");
+            const actualFinalTotalEl = document.getElementById("actualFinalTotal");
+            const totalB1El = document.getElementById("totalB1");
+            const totalB2El = document.getElementById("totalB2");
+
+            function createJohnRow(john) {
+                let row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${john}</td>
+                    <td><input type="text" class="board1-input" placeholder="10,15,5"></td>
+                    <td class="board1-total">0</td>
+                    <td><input type="text" class="board2-input" placeholder="10,15,5"></td>
+                    <td class="board2-total">0</td>
+                    <td class="final-total">0</td>
+                `;
+
+                tableBody.appendChild(row);
+            }
+
+            function loadJohns() {
+                johnTypes.forEach(john => createJohnRow(john));
+            }
+
+            function calculateTotals() {
+                let actualFinalTotal = 0;
+                let total_B1 = 0;
+                let total_B2 = 0;
+                
+                document.querySelectorAll("#johnTable tr").forEach(row => {
+                    let board1Input = row.querySelector(".board1-input").value;
+                    let board2Input = row.querySelector(".board2-input").value;
+
+                    let board1Total = board1Input ? board1Input.split(",").reduce((sum, num) => sum + Number(num.trim()), 0) : 0;
+                    let board2Total = board2Input ? board2Input.split(",").reduce((sum, num) => sum + Number(num.trim()), 0) : 0;
+
+                    row.querySelector(".board1-total").innerText = board1Total;
+                    row.querySelector(".board2-total").innerText = board2Total;
+                
+                    total_B1 += board1Total;
+                    total_B2 += board2Total;
+
+                    let finalTotal = board1Total + board2Total;
+                    row.querySelector(".final-total").innerText = finalTotal;
+
+                    actualFinalTotal += finalTotal;
+                });
+
+                actualFinalTotalEl.innerText = actualFinalTotal;
+                totalB1El.innerText = total_B1;
+                totalB2El.innerText = total_B2;
+            }
+
+            function addNewJohn() {
+                const newJohnName = document.getElementById("newJohnName").value.trim().toUpperCase();
+
+                if (newJohnName === "" || johnTypes.includes(newJohnName)) {
+                    alert("Invalid or duplicate John name!");
+                    return;
+                }
+
+                johnTypes.push(newJohnName);
+                createJohnRow(newJohnName);
+                document.getElementById("newJohnName").value = "";
+            }
+
+            function whitespace(total) {
+                if (total >= 1000) {
+                    return "  ";
+                } else if (total >= 100) {
+                    return "   ";
+                } else if (total >= 10) {
+                    return "    ";
+                } else {
+                    return "     ";
+                }
+            }
+            function whitespaces(total) {
+                if (total.length == 4) {
+                    return " ";
+                } else if (total.length == 3) {
+                    return "  ";
+                } else if (total.length == 2) {
+                    return "   ";
+                }
+            }
+            
+            function summarizeAndCopy() {
+                let summary = "```John |Board1|Board2|Sum\n";
+                summary += `------------------------\n`;
+                document.querySelectorAll("#johnTable tr").forEach(row => {
+                    let johnType = row.querySelector("td:first-child").innerText;
+                    let board1Total = row.querySelector(".board1-total").innerText;
+                    let board2Total = row.querySelector(".board2-total").innerText;
+                    let finalTotal = row.querySelector(".final-total").innerText;
+                    summary += `${johnType}${whitespaces(johnType)}|${board1Total}${whitespace(board1Total)}|${board2Total}${whitespace(board2Total)}|${finalTotal}\n`;
+                });
+
+                let totalB1 = document.getElementById("totalB1").innerText;
+                let totalB2 = document.getElementById("totalB2").innerText;
+                summary += `------------------------\n`;
+                summary += `Sum${whitespaces('Sum')}|${totalB1}${whitespace(totalB1)}|${totalB2}${whitespace(totalB2)}|${actualFinalTotalEl.innerText}\n`;
+                let finalTotalSum = document.getElementById("actualFinalTotal").innerText;
+                summary += `\nFinal Total = ${finalTotalSum}\`\`\``;
+
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(summary).then(() => {
+                        alert("Summary copied to clipboard!");
+                    }).catch(err => {
+                        fallbackCopyTextToClipboard(summary);
+                    });
+                } else {
+                    fallbackCopyTextToClipboard(summary);
+                }
+            }
+
+            function fallbackCopyTextToClipboard(text) {
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert("Summary copied to clipboard!");
+                } catch (err) {
+                    alert("Failed to copy summary: " + err);
+                }
+                document.body.removeChild(textArea);
+            }
+
+            document.addEventListener("input", calculateTotals);
+            loadJohns();
+        </script>
+    </div>
+    <div class="section-divider"></div>
+    <div class="section3">
+        <h2>Free Gift</h2>
+        <div class="add-gift-container">
+            <select id="johnTypeSelect">
+                <!-- Options will be generated dynamically -->
+            </select>
+            <button onclick="addGiftRow()">+ Add Gift</button>
+        </div>
+        <br>
+        <table>
+            <thead>
+                <tr>
+                    <th>John Type</th>
+                    <th>Quantity</th>
+                    <th>Price (RM)</th>
+                </tr>
+            </thead>
+            <tbody id="freeGiftTable">
+                <!-- Rows will be generated dynamically -->
+            </tbody>
+            <tfoot>
+                <tr class="final-total-row">
+                    <td>Total</td>
+                    <td id="totalQuantity">0</td>
+                    <td id="totalPrice">0</td>
+                </tr>
+            </tfoot>
+        </table>
+        <button onclick="summarizeAndCopyFreeGift()">Summarize & Copy Free Gift</button>
+    </div>
+
+    <script>
+        const johnPrices = {
+            "J A": 11.0, "J D": 11.0, "J SA": 13.0, "J SD": 13.0, "J UA": 14.0, "J UD": 14.0, "J UK": 28.0,
+            "J GA": 13.0, "J GD": 13.0, "J GK": 25.0, "J OA": 12.0, "J OD": 12.0, "J OK": 15.0, "JTUN": 13.0,
+            "JSEA": 13.0, "JSAR": 11.0, "J AG": 13.0, "JBMT": 17.0, "J MB": 13.0, "J JJ": 13.0, "JTCA": 22.0,
+            "JTCD": 22.0
+        };
+
+        function loadJohnTypeOptions() {
+            const johnTypeSelect = document.getElementById("johnTypeSelect");
+            Object.keys(johnPrices).forEach(john => {
+                let option = document.createElement("option");
+                option.value = john;
+                option.text = john;
+                johnTypeSelect.appendChild(option);
+            });
+        }
+
+        function addGiftRow() {
+            const johnTypeSelect = document.getElementById("johnTypeSelect");
+            const selectedJohnType = johnTypeSelect.value;
+            const price = johnPrices[selectedJohnType];
+
+            let row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${selectedJohnType}</td>
+                <td><input type="number" class="quantity-input" placeholder="Enter quantity" oninput="calculateGiftTotals()"></td>
+                <td class="price">${price}</td>
+            `;
+            document.getElementById("freeGiftTable").appendChild(row);
+        }
+
+        function calculateGiftTotals() {
+            let totalQuantity = 0;
+            let totalPrice = 0;
+
+            document.querySelectorAll("#freeGiftTable tr").forEach(row => {
+                let quantity = Number(row.querySelector(".quantity-input").value) || 0;
+                let price = Number(row.querySelector(".price").innerText) || 0;
+
+                totalQuantity += quantity;
+                totalPrice += quantity * price;
+            });
+
+            document.getElementById("totalQuantity").innerText = totalQuantity;
+            document.getElementById("totalPrice").innerText = totalPrice.toFixed(2);
+        }
+
+        function w(total) {
+            if (total >= 100) {
+                return "   ";
+            } else if (total >= 10) {
+                return "    ";
+            } else {
+                return "     ";
+            }
+        }
+        function w2(length) {
+            if (length.length == 4) {
+                return " ";
+            } else if (length.length == 3) {
+                return "  ";
+            } else if (length.length == 2) {
+                return "   ";
+            }
+        }
+
+        function summarizeAndCopyFreeGift() {
+            let rows = Array.from(document.querySelectorAll("#freeGiftTable tr"));
+            rows.sort((a, b) => {
+                let johnA = a.querySelector("td:first-child").innerText;
+                let johnB = b.querySelector("td:first-child").innerText;
+                return johnA.localeCompare(johnB);
+            });
+
+            let summary = "```John |Quantity|Price (RM)\n";
+            summary += `------------------------\n`;
+            rows.forEach(row => {
+                let johnType = row.querySelector("td:first-child").innerText;
+                let quantity = row.querySelector(".quantity-input").value || 0;
+                let price = row.querySelector(".price").innerText || 0;
+                summary += `${johnType}${w2(johnType)}| ${quantity}${w(quantity)} | RM${price*quantity}\n`;
+            });
+
+            let totalQuantity = document.getElementById("totalQuantity").innerText;
+            let totalPrice = document.getElementById("totalPrice").innerText;
+            summary += `------------------------\n`;
+            summary += `Total| ${totalQuantity} Btg | RM${totalPrice}\n\`\`\``;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(summary).then(() => {
+                    alert("Summary copied to clipboard!");
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(summary);
+                });
+            } else {
+                fallbackCopyTextToClipboard(summary);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert("Summary copied to clipboard!");
+            } catch (err) {
+                alert("Failed to copy summary: " + err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function storeProgress() {
+            const dateKey = new Date().toISOString().split('T')[0]; // Use only the date part
+            const johnTableData = Array.from(document.querySelectorAll("#johnTable tr")).map(row => ({
+                johnType: row.querySelector("td:first-child").innerText,
+                board1Input: row.querySelector(".board1-input").value,
+                board2Input: row.querySelector(".board2-input").value
+            }));
+            const freeGiftTableData = Array.from(document.querySelectorAll("#freeGiftTable tr")).map(row => ({
+                johnType: row.querySelector("td:first-child").innerText,
+                quantity: row.querySelector(".quantity-input").value,
+                price: row.querySelector(".price").innerText
+            }));
+            const data = {
+                johnTableData,
+                freeGiftTableData,
+                totalB1: totalB1El.innerText,
+                totalB2: totalB2El.innerText,
+                actualFinalTotal: actualFinalTotalEl.innerText,
+                totalQuantity: document.getElementById("totalQuantity").innerText,
+                totalPrice: document.getElementById("totalPrice").innerText
+            };
+            localStorage.setItem(dateKey, JSON.stringify(data));
+            alert("Progress stored with key: " + dateKey);
+        }
+
+        function resumeProgress() {
+            const keys = Object.keys(localStorage);
+            if (keys.length === 0) {
+                alert("No stored progress found.");
+                return;
+            }
+            const latestKey = keys.sort().pop();
+            const data = JSON.parse(localStorage.getItem(latestKey));
+            if (!data || !data.johnTableData || !data.freeGiftTableData) {
+                alert("Failed to load stored progress.");
+                return;
+            }
+
+            // Restore John Table
+            tableBody.innerHTML = "";
+            data.johnTableData.forEach(item => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.johnType}</td>
+                    <td><input type="text" class="board1-input" value="${item.board1Input}" placeholder="10,15,5"></td>
+                    <td class="board1-total">0</td>
+                    <td><input type="text" class="board2-input" value="${item.board2Input}" placeholder="10,15,5"></td>
+                    <td class="board2-total">0</td>
+                    <td class="final-total">0</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Restore Free Gift Table
+            const freeGiftTableBody = document.getElementById("freeGiftTable");
+            freeGiftTableBody.innerHTML = "";
+            data.freeGiftTableData.forEach(item => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.johnType}</td>
+                    <td><input type="number" class="quantity-input" value="${item.quantity}" placeholder="Enter quantity" oninput="calculateGiftTotals()"></td>
+                    <td class="price">${item.price}</td>
+                `;
+                freeGiftTableBody.appendChild(row);
+            });
+
+            // Restore totals
+            totalB1El.innerText = data.totalB1;
+            totalB2El.innerText = data.totalB2;
+            actualFinalTotalEl.innerText = data.actualFinalTotal;
+            document.getElementById("totalQuantity").innerText = data.totalQuantity;
+            document.getElementById("totalPrice").innerText = data.totalPrice;
+
+            calculateTotals();
+            calculateGiftTotals();
+            alert("Progress resumed from key: " + latestKey);
+        }
+
+        loadJohnTypeOptions();
+    </script>
+
+</body>
+</html>
