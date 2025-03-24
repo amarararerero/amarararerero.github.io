@@ -380,19 +380,43 @@
                 option.text = john;
                 johnTypeSelect.appendChild(option);
             });
+
+            // Add an option for custom John
+            let customOption = document.createElement("option");
+            customOption.value = "custom";
+            customOption.text = "Custom John";
+            johnTypeSelect.appendChild(customOption);
         }
 
         function addGiftRow() {
             const johnTypeSelect = document.getElementById("johnTypeSelect");
             const selectedJohnType = johnTypeSelect.value;
-            const price = johnPrices[selectedJohnType];
 
             let row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${selectedJohnType}</td>
-                <td><input type="number" class="quantity-input" placeholder="Enter quantity" oninput="calculateGiftTotals()"></td>
-                <td class="price">${price}</td>
-            `;
+
+            if (selectedJohnType === "custom") {
+                const customJohnType = prompt("Enter the custom John type:");
+                const customPrice = parseFloat(prompt("Enter the price for the custom John:"));
+
+                if (!customJohnType || isNaN(customPrice)) {
+                    alert("Invalid custom John type or price!");
+                    return;
+                }
+
+                row.innerHTML = `
+                    <td>${customJohnType}</td>
+                    <td><input type="number" class="quantity-input" placeholder="Enter quantity" oninput="calculateGiftTotals()"></td>
+                    <td class="price">${customPrice.toFixed(2)}</td>
+                `;
+            } else {
+                const price = johnPrices[selectedJohnType];
+                row.innerHTML = `
+                    <td>${selectedJohnType}</td>
+                    <td><input type="number" class="quantity-input" placeholder="Enter quantity" oninput="calculateGiftTotals()"></td>
+                    <td class="price">${price}</td>
+                `;
+            }
+
             document.getElementById("freeGiftTable").appendChild(row);
         }
 
