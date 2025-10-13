@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TableGenerator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        'dark-primary': '#1A1A2E', // Deep purple/blue dark background
+                        'dark-secondary': '#16213E', // Slightly lighter for card BG
+                        'accent': '#E94560', // Bright accent color (Reddish)
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Apply Inter font and dark mode classes globally */
+        body {
+            background-color: #0d0d1a; /* Very dark background */
+            background-image: url("https://images.hdqwalls.com/wallpapers/dark-abstract-black-minimal-4k-q0.jpg");
+             background-size: cover;
+            background-attachment: fixed;
+        }
+        
+        /* Glassmorphism base styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08); /* Light background with low opacity */
+            backdrop-filter: blur(10px); /* The key glass effect */
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive table styling */
+        .schedule-table-container {
+            overflow-x: auto;
+        }
+
+        /* Custom scrollbar for dark theme */
+        .schedule-table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .schedule-table-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .schedule-table-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ensure table cells have padding and align nicely */
+        .schedule-grid td {
+            vertical-align: middle;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .schedule-grid th, .schedule-grid td {
+            /* Prevent cell content from overflowing or wrapping awkwardly */
+            white-space: normal;
+        }
+
+        /* Custom class for subject block with wrapping lecturer name */
+        .subject-block {
+            padding: 0.5rem; /* Reduced padding */
+            margin-bottom: 0.5rem; /* Reduced margin */
+        }
+
+    </style>
+</head>
+
+<body class="dark bg-dark-primary text-gray-100 min-h-screen p-4 sm:p-8 transition-colors duration-300">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-2 tracking-tight">
+                Ngawi Table Generator
+            </h1>
+            <p class="text-gray-400">Fixed weekly schedule (Monday - Friday).</p>
+        </header>
+
+        <div class="glass-card p-6 sm:p-10 rounded-xl shadow-2xl">
+            
+            <div class="mb-8 p-4 glass-card rounded-lg flex flex-col sm:flex-row gap-4 items-center justify-center border-none shadow-none">
+                <label for="matrix-input" class="text-lg font-medium text-white/80 shrink-0">Enter Matrix Number:</label>
+                <input type="text" id="matrix-input" placeholder="e.g., 2024441874" 
+                       class="w-full sm:w-80 px-4 py-2 bg-dark-secondary/50 border border-accent/50 rounded-lg 
+                              focus:ring-2 focus:ring-accent focus:border-accent text-white placeholder-gray-500 
+                              transition duration-150 shadow-inner" 
+                       value="2024441874">
+                <button id="fetch-button" class="w-full sm:w-auto px-6 py-2 bg-accent hover:bg-red-600 
+                                                  text-white font-bold rounded-lg shadow-lg transition duration-300 
+                                                  transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-accent/50">
+                    View Schedule
+                </button>
+                <button id="export-button" class="w-full sm:w-auto px-6 py-2 bg-gray-500 hover:bg-gray-600 
+                                                  text-white font-bold rounded-lg shadow-lg transition duration-300 
+                                                  transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-500/50 hidden">
+                    Export to Image
+                </button>
+            </div>
+
+            <div id="loading-indicator" class="text-center p-8 text-xl text-accent hidden">
+                <svg class="animate-spin h-6 w-6 text-accent mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading schedule data...
+            </div>
+
+            <div id="error-message" class="hidden p-6 bg-red-900/30 border border-red-500 rounded-lg text-red-300">
+                <p class="font-bold">Error retrieving data:</p>
+                <p id="error-details"></p>
+                <p class="mt-2 text-sm">Please check the Matrix Number or connectivity. This could also be due to CORS restrictions or the remote server blocking the request.</p>
+            </div>
+
+            <div id="schedule-container" class="schedule-table-container mt-6">
+                </div>
+            
+        </div>
+    </div>
+
+<script>
+        // --- Configuration ---
+        const BASE_API_URL = 'https://cdn.uitm.edu.my/jadual/baru/';
+        const CUSTOM_HEADERS = {
+            "User-Agent": "Mozilla/5.0",
+            "Referer": "https://mystudent.uitm.edu.my/",
+        };
+        const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+        // --- PREDEFINED COLOR PALETTE (10 colors) ---
+        const COLOR_PALETTE = [
+            'hsl(0, 45%, 55%)',    // Muted Rose Red
+            'hsl(25, 45%, 55%)',   // Soft Amber
+            'hsl(50, 45%, 55%)',   // Pastel Mustard
+            'hsl(90, 45%, 55%)',   // Muted Lime
+            'hsl(150, 45%, 55%)',  // Gentle Mint
+            'hsl(190, 45%, 55%)',  // Soft Cyan
+            'hsl(220, 45%, 55%)',  // Dusty Blue
+            'hsl(260, 45%, 55%)',  // Lavender Gray
+            'hsl(290, 45%, 55%)',  // Muted Purple
+            'hsl(330, 45%, 55%)',  // Faded Pink
+        ];
+
+        
+        // Cache for subject colors
+        const subjectColors = {};
+        
+        // --- Helper Functions ---
+        
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        function getSubjectColor(courseId) {
+            if (!subjectColors[courseId]) {
+                const hashValue = simpleHash(courseId);
+                const colorIndex = hashValue % COLOR_PALETTE.length; 
+                subjectColors[courseId] = COLOR_PALETTE[colorIndex];
+            }
+            return subjectColors[courseId];
+        }
+
+        function formatTime(masa) {
+            if (!masa) return 'N/A';
+            return masa.replace(/ (AM|PM)/g, '').trim();
+        }
+
+        // --- DOM Elements ---
+        const body = document.body; // Reference to the body element
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorContainer = document.getElementById('error-message');
+        const errorDetails = document.getElementById('error-details');
+        const scheduleContainer = document.getElementById('schedule-container');
+        const matrixInput = document.getElementById('matrix-input');
+        const fetchButton = document.getElementById('fetch-button');
+        const exportButton = document.getElementById('export-button');
+
+        function renderTable(data) {
+            scheduleContainer.innerHTML = '';
+            exportButton.classList.add('hidden');
+            
+            if (Array.isArray(data) || typeof data !== 'object' || data === null) {
+                const dates = Array.isArray(data) ? data.slice(0, 3).join(', ') : 'N/A';
+                scheduleContainer.innerHTML = `
+                    <div class="p-8 text-center glass-card rounded-xl border border-yellow-500/50 text-gray-400">
+                        <p class="text-xl font-bold text-yellow-400 mb-2">Schedule Data Format Error</p>
+                        <p>The server returned an unexpected format (received an array or invalid data).</p>
+                        <p class="mt-2 text-sm">Sample data received (expected object keys): ${dates ? dates + '...' : 'None'}</p>
+                        <p class="text-xs mt-1">This means the full schedule data is not available at this endpoint yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const allTimeSlots = new Set();
+            const weeklySchedule = {}; 
+            const dates = Object.keys(data).sort();
+            
+            dates.forEach((date) => {
+                const dayData = data[date];
+                if (!dayData || !dayData.jadual) return;
+                
+                const dayName = dayData.hari;
+                if (!DAYS_OF_WEEK.includes(dayName)) return;
+
+                if (!weeklySchedule[dayName]) {
+                    weeklySchedule[dayName] = {};
+                }
+
+                dayData.jadual.forEach(schedule => {
+                    const timeSlot = formatTime(schedule.masa);
+                    allTimeSlots.add(timeSlot);
+
+                    if (!weeklySchedule[dayName][timeSlot]) {
+                        weeklySchedule[dayName][timeSlot] = new Map();
+                    }
+                    
+                    if (!weeklySchedule[dayName][timeSlot].has(schedule.courseid)) {
+                        weeklySchedule[dayName][timeSlot].set(schedule.courseid, schedule);
+                    }
+                });
+            });
+
+            const sortedTimeSlots = Array.from(allTimeSlots).sort((a, b) => {
+                const timeA = a.split(' - ')[0];
+                const timeB = b.split(' - ')[0];
+                return timeA.localeCompare(timeB);
+            });
+
+            if (sortedTimeSlots.length === 0) {
+                scheduleContainer.innerHTML = `
+                    <div class="p-8 text-center glass-card rounded-xl text-gray-400">
+                        <p class="text-xl font-bold text-accent mb-2">No Weekday Schedule Found</p>
+                        <p>No classes were found between Monday and Friday for this schedule.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <table id="schedule-table" class="schedule-grid min-w-full glass-card border-separate border-spacing-0 rounded-xl shadow-xl">
+                    <thead class="sticky top-0 bg-dark-secondary/80 backdrop-blur-sm z-10">
+                        <tr>
+                            <th class="px-3 py-3 sm:px-4 text-center text-xs font-bold uppercase tracking-wider text-accent w-24 rounded-tl-xl border-r border-gray-700/50">Day / Time</th>
+            `;
+            
+            sortedTimeSlots.forEach((timeSlot, index) => {
+                const isLast = index === sortedTimeSlots.length - 1;
+                tableHTML += `
+                    <th class="px-3 py-3 sm:px-4 text-center text-xs font-semibold uppercase tracking-wider text-accent min-w-[150px] ${isLast ? 'rounded-tr-xl' : ''}">
+                        ${timeSlot}
+                    </th>
+                `;
+            });
+
+            tableHTML += `
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700/50">
+            `;
+
+            DAYS_OF_WEEK.forEach(dayName => {
+                tableHTML += `
+                    <tr class="transition duration-150 border-b border-gray-700/50">
+                        <td class="px-1 py-4 sm:px-4 whitespace-nowrap text-base font-extrabold text-accent bg-dark-secondary/50 border-r border-gray-700/50 text-center">
+                            ${dayName}
+                        </td>
+                `;
+                
+                sortedTimeSlots.forEach((timeSlot, timeIndex) => {
+                    const uniqueScheduleMap = weeklySchedule[dayName]?.[timeSlot];
+                    const schedules = uniqueScheduleMap ? Array.from(uniqueScheduleMap.values()) : [];
+                    
+                    const classes = "p-1 sm:p-2 text-sm text-gray-200 border-gray-700/50"; 
+                    
+                    if (schedules.length > 0) {
+                        const content = schedules.map(schedule => {
+                            const bgColor = getSubjectColor(schedule.courseid);
+                            
+                            return `
+                                <div class="subject-block h-auto p-2 rounded-lg border shadow-md" style="background: ${bgColor}; border-color: ${bgColor}; color: #1f2937;">
+                                    <div class="font-bold text-sm leading-tight text-white">${schedule.courseid}</div>
+                                    <div class="text-xs font-bold text-white/80 leading-tight">${schedule.bilik || 'Online'}</div>
+                                    <div class="text-xs italic text-white/70 mt-1 leading-tight" title="${schedule.lecturer}">${schedule.lecturer}</div>
+                                </div>
+                            `;
+                        }).join('');
+                        
+                        tableHTML += `<td class="${classes} bg-dark-secondary/20">${content}</td>`;
+                    } else {
+                        tableHTML += `<td class="${classes} bg-dark-primary/10 text-gray-600 italic"></td>`;
+                    }
+                });
+                
+                tableHTML += `
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            scheduleContainer.innerHTML = tableHTML;
+            exportButton.classList.remove('hidden');
+        }
+
+        async function fetchSchedule(matrixNumber) {
+            
+            if (!matrixNumber || matrixNumber.trim() === '') {
+                errorDetails.textContent = "Please enter your Matrix Number before viewing the schedule.";
+                errorContainer.classList.remove('hidden');
+                loadingIndicator.classList.add('hidden');
+                scheduleContainer.innerHTML = '';
+                exportButton.classList.add('hidden');
+                return;
+            }
+
+            const apiUrl = `${BASE_API_URL}${matrixNumber}.json`;
+
+            loadingIndicator.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            scheduleContainer.innerHTML = '';
+            exportButton.classList.add('hidden');
+
+            const maxRetries = 1; 
+            let lastError = null;
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'GET',
+                        headers: CUSTOM_HEADERS
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status} (Could not find schedule for ID: ${matrixNumber})`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (Array.isArray(data)) {
+                         const dates = data.slice(0, 5).join(', ');
+                         loadingIndicator.classList.add('hidden');
+                         scheduleContainer.innerHTML = `
+                            <div class="p-8 text-center glass-card rounded-xl border border-yellow-500/50 text-gray-400">
+                                <p class="text-xl font-bold text-yellow-400 mb-2">Server Returned Date Index</p>
+                                <p>The API provided a list of dates instead of the full schedule object.</p>
+                                <p class="mt-2 text-sm">Example Dates: ${dates}...</p>
+                                <p class="text-xs mt-1">This usually means the schedule data is not yet compiled or published for this ID.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    renderTable(data); 
+                    
+                    loadingIndicator.classList.add('hidden');
+                    return; 
+
+                } catch (error) {
+                    lastError = error;
+                    console.error(`Attempt ${attempt} failed:`, error);
+                }
+            }
+
+            loadingIndicator.classList.add('hidden');
+            errorContainer.classList.remove('hidden');
+            errorDetails.textContent = lastError.message;
+        }
+
+        // FIX: Converts the schedule container's content into a downloadable PNG image with improved quality.
+        function exportScheduleAsImage() {
+            // 1. Element to capture (The full container)
+            const element = document.getElementById('schedule-container');
+            const mainCard = element.closest('.glass-card');
+
+            if (!element || element.children.length === 0) {
+                alert("Please view a schedule first before exporting.");
+                return;
+            }
+            
+            const scale = 3; 
+            const originalWidth = element.style.width;
+            element.style.width = `${element.scrollWidth}px`;
+            const originalCardBg = mainCard.style.backgroundColor;
+            mainCard.style.backgroundColor = '#16213E'; // The dark-secondary color, a solid dark base
+
+            html2canvas(mainCard, {
+                // IMPORTANT: Capture the whole parent card, not just the scrollable container
+                scrollX: 0,
+                scrollY: -window.scrollY,
+                scale: scale, 
+                // Set explicit dimensions based on the new scrollable width
+                width: mainCard.offsetWidth,
+                height: mainCard.offsetHeight,
+                backgroundColor: null, 
+                useCORS: true, 
+            }).then(canvas => {
+                // --- Revert temporary styles ---
+                element.style.width = originalWidth; 
+                mainCard.style.backgroundColor = originalCardBg; // Revert to glass effect
+
+                // Convert the canvas to a data URL
+                const imageURL = canvas.toDataURL('image/png', 1.0); // 1.0 quality for PNG
+
+                // Create a temporary link element for download
+                const link = document.createElement('a');
+                link.href = imageURL;
+                const matrixNumber = matrixInput.value.trim() || 'Schedule';
+                link.download = `${matrixNumber}_Schedule_HighRes.png`; 
+
+                // Programmatically click the link to trigger the download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }).catch(error => {
+                // --- Ensure styles are reverted even on error ---
+                element.style.width = originalWidth; 
+                mainCard.style.backgroundColor = originalCardBg;
+
+                console.error("Error during image export:", error);
+                alert("Failed to export schedule to image. Check console for details.");
+            });
+        }
+
+
+        // --- Event Listener Setup ---
+        window.onload = () => {
+            fetchButton.addEventListener('click', () => {
+                const matrixNumber = matrixInput.value.trim();
+                fetchSchedule(matrixNumber);
+            });
+            
+            exportButton.addEventListener('click', exportScheduleAsImage);
+
+            matrixInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    fetchButton.click();
+                }
+            });
+
+            const initialMatrix = matrixInput.value.trim();
+            if (initialMatrix) {
+                fetchSchedule(initialMatrix);
+            }
+        };
+
+    </script>
+    </body>
+</html>
