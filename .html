@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome Dashboard</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Load Space Grotesk Font for futuristic feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply the futuristic font globally */
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0d0d10; /* Very dark background */
+	    background-image: url('./ascii-art.png');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-size: 1500px auto;
+            color: #c4c4ff; /* Muted primary text color */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* Subtle radial background gradient for depth */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(30, 0, 50, 0.15) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Blinking Logo Animation */
+        @keyframes blink {
+            0% { opacity: 1; text-shadow: 0 0 5px rgba(100, 100, 255, 0.6); }
+            50% { opacity: 0.7; text-shadow: 0 0 15px rgba(100, 100, 255, 1); }
+            100% { opacity: 1; text-shadow: 0 0 5px rgba(100, 100, 255, 0.6); }
+        }
+
+        .blinking-logo {
+            animation: blink 3s infinite alternate ease-in-out;
+            color: #a0a0ff;
+        }
+
+        /* Search Bar Focus/Hover effect */
+        .search-input:focus {
+            box-shadow: 0 0 10px rgba(100, 100, 255, 0.8), 0 0 20px rgba(100, 100, 255, 0.3);
+            border-color: #8b8bff;
+        }
+
+        /* Shortcut Hover Effect */
+        .shortcut-item:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(100, 100, 255, 0.5);
+            border-color: #a0a0ff;
+        }
+
+        .shortcut-item {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid rgba(100, 100, 255, 0.2);
+        }
+
+        /* System Info Container Glow */
+        #system-info-container {
+            border: 1px solid rgba(100, 100, 255, 0.3);
+            box-shadow: 0 0 10px rgba(100, 100, 255, 0.2);
+            transition: all 0.3s;
+        }
+
+        /* Responsive Grid for Shortcuts */
+        @media (max-width: 640px) {
+            #shortcuts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- 1. Laptop System Information (Top Right Corner) -->
+    <div id="system-info-container" class="absolute top-4 right-4 p-3 text-xs bg-[#1a1a2e] rounded-lg shadow-xl text-indigo-300 z-10">
+        <div class="flex items-center space-x-2 mb-1 border-b border-indigo-300 pb-1">
+            <i data-lucide="monitor-dot" class="w-4 h-4 text-green-400"></i>
+            <span class="text-gray-400">System Status | <span id="time"></span></span>
+        </div>
+        <div class="flex flex-col space-y-1" id="system-data-list">
+            <!-- New icon-driven structure for requested data points -->
+            <div id="info-os" class="flex items-center space-x-2">Loading...</div>
+            <div id="info-core" class="flex items-center space-x-2">Loading...</div>
+            <div id="info-ram" class="flex items-center space-x-2">Loading...</div>
+            <div id="info-resolution" class="flex items-center space-x-2">Loading...</div>
+            <div id="info-connection" class="flex items-center space-x-2">Loading...</div>
+            <div id="info-speed" class="flex items-center space-x-2">Loading...</div>
+            <div id="info-battery" class="flex items-center space-x-2">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area (Centered) -->
+    <main class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center relative z-10 p-4 pt-16 md:pt-24">
+
+        <!-- 2. Logo (Blinking) -->
+        <h1 class="blinking-logo text-6xl md:text-8xl font-bold mb-12 select-none">
+            BLIN<span class="text-indigo-500">K</span>
+        </h1>
+
+        <!-- 3. Search Bar -->
+        <div class="w-full max-w-xl mb-16">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-400"></i>
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Query the Archive..."
+                    class="search-input w-full py-4 pl-12 pr-6 text-lg bg-[#1a1a2e] border-2 border-indigo-500/50 rounded-xl focus:outline-none text-white transition duration-300"
+                    aria-label="Search"
+                />
+            </div>
+        </div>
+
+        <!-- 4. Shortcuts Grid -->
+        <div id="shortcuts-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full max-w-2xl">
+            <!-- Shortcut items will be populated by JavaScript -->
+        </div>
+
+    </main>
+
+<script>
+    const searchInput = document.getElementById('search-input');
+    const shortcutsGrid = document.getElementById('shortcuts-grid');
+    const timeSpan = document.getElementById('time'); 
+    
+    // New elements for detailed system info with icon support
+    const infoOS = document.getElementById('info-os');
+    const infoCore = document.getElementById('info-core');
+    const infoRAM = document.getElementById('info-ram');
+    const infoResolution = document.getElementById('info-resolution');
+    const infoConnection = document.getElementById('info-connection');
+    const infoSpeed = document.getElementById('info-speed');
+    const infoBattery = document.getElementById('info-battery');
+
+
+    // --- Detailed System Info Functions (Unchanged) ---
+
+    function getSystemInfo() {
+        const ua = navigator.userAgent;
+        let os = 'Unknown OS';
+        
+        if (ua.includes('Windows')) os = 'Windows';
+        else if (ua.includes('Macintosh')) os = 'macOS';
+        else if (ua.includes('Linux')) os = 'Linux';
+        else if (ua.includes('Android')) os = 'Android';
+        else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+        
+        return {
+            operatingSystem: os,
+        };
+    }
+
+    function getDisplayInfo() {
+        return {
+            resolution: `${screen.width}x${screen.height}`,
+        };
+    }
+
+    function getNetworkInfo() {
+        const connection = navigator.connection;
+        return {
+            status: navigator.onLine ? 'Online' : 'Offline',
+            connectionType: connection ? connection.effectiveType : 'Unknown',
+            cpuCores: `${navigator.hardwareConcurrency || 'N/A'}`, 
+            speed: connection ? connection.downlink + ' Mbps' : 'N/A',
+            deviceMemory: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'N/A' 
+        };
+    }
+
+    async function getBatteryInfo() {
+        if ('getBattery' in navigator) {
+            try {
+                const battery = await navigator.getBattery();
+                const statusText = battery.charging ? 'Charging' : 'Discharging';
+                return {
+                    level: `${Math.round(battery.level * 100)}%`,
+                    status: statusText,
+                };
+            } catch (error) {
+                return { level: 'N/A', status: 'Error' };
+            }
+        }
+        return { level: 'N/A', status: 'API N/S' };
+    }
+    
+    // --- Combined Update Logic (Refreshes everything every minute) ---
+
+    async function updateSystemInfo() {
+        // --- 1. Update Time (Refresh by Minute) ---
+        const now = new Date();
+        // Use '2-digit' for minute to ensure it updates visibly every time
+        const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+        const dateOptions = { day: '2-digit', month: 'short', year: 'numeric' };
+
+        const dateString = now.toLocaleDateString('en-US', dateOptions);
+        // Only show the hour and minute, which align with the 1-minute refresh
+        const timeString = now.toLocaleTimeString('en-US', timeOptions); 
+        timeSpan.textContent = `${dateString} | ${timeString}`;
+        
+        
+        // --- 2. Update System Data (Refresh by Minute) ---
+        const system = getSystemInfo();
+        const display = getDisplayInfo();
+        const network = getNetworkInfo();
+        const battery = await getBatteryInfo();
+        
+        // OS
+        infoOS.innerHTML = `<i data-lucide="laptop" class="w-3 h-3 text-indigo-400"></i><span>${system.operatingSystem}</span>`;
+        // Core
+        infoCore.innerHTML = `<i data-lucide="cpu" class="w-3 h-3 text-indigo-400"></i><span>${network.cpuCores} Cores</span>`;
+        // RAM
+        infoRAM.innerHTML = `<i data-lucide="memory-stick" class="w-3 h-3 text-indigo-400"></i><span>RAM: ${network.deviceMemory}</span>`;
+        // Resolution
+        infoResolution.innerHTML = `<i data-lucide="maximize" class="w-3 h-3 text-indigo-400"></i><span>${display.resolution}</span>`;
+        // Speed
+        infoSpeed.innerHTML = `<i data-lucide="zap" class="w-3 h-3 text-indigo-400"></i><span>Speed: ${network.speed}</span>`;
+
+        // Connection
+        let connectionIcon = network.status === 'Online' ? 'wifi' : 'cloud-off';
+        let connectionColor = network.status === 'Online' ? 'text-green-400' : 'text-red-400';
+        infoConnection.innerHTML = `<i data-lucide="${connectionIcon}" class="w-3 h-3 ${connectionColor}"></i><span class="${connectionColor}">${network.status}:</span> <span>${network.connectionType}</span>`;
+
+        // Battery Percent
+        let batteryIcon = battery.status === 'Charging' ? 'battery-charging' : 'battery';
+        let batteryColor = battery.status === 'Charging' ? 'text-yellow-400' : 'text-indigo-300';
+        infoBattery.innerHTML = `<i data-lucide="${batteryIcon}" class="w-3 h-3 ${batteryColor}"></i><span class="${batteryColor}">${battery.level}:</span> <span>${battery.status}</span>`;
+        
+        // Re-render Lucide icons
+        lucide.createIcons();
+        
+        // Rerun this function in 60 seconds (1 minute)
+        setTimeout(updateSystemInfo, 60000); 
+    }
+
+    
+    // --- 3. Search Bar Logic (Unchanged) ---
+    const handleSearch = () => {
+        const query = searchInput.value.trim();
+        if (query) {
+            window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        }
+    };
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    });
+
+    // --- 4. Shortcut Data and Rendering (Unchanged) ---
+    const shortcuts = [
+        { name: "Youtube", url: "https://youtube.com", icon: "youtube", color: "text-red-400" },
+        { name: "GMail", url: "https://mail.google.com", icon: "mail", color: "text-green-400" },
+        { name: "UFuture", url: "https://ufuture.uitm.edu.my/home/", icon: "university", color: "text-blue-400" },
+        { name: "Github", url: "https://github.com/amarararerero", icon: "github", color: "text-yellow-400" },
+        { name: "Analytics", url: "https://dash.analytics.com", icon: "line-chart", color: "text-pink-400" },
+        { name: "Design Files", url: "https://www.figma.com", icon: "layout-dashboard", color: "text-cyan-400" },
+    ];
+
+    const renderShortcuts = () => {
+        shortcutsGrid.innerHTML = ''; 
+        shortcuts.forEach(shortcut => {
+            const item = document.createElement('a');
+            item.href = shortcut.url;
+            item.target = "_self"; 
+            item.className = `shortcut-item flex flex-col items-center justify-center p-4 bg-[#1a1a2e]/50 hover:bg-[#1a1a2e] rounded-xl text-center shadow-lg transition duration-200 cursor-pointer`;
+            item.innerHTML = `
+                <i data-lucide="${shortcut.icon}" class="w-8 h-8 ${shortcut.color} mb-2"></i>
+                <span class="text-sm font-medium text-gray-200">${shortcut.name}</span>
+            `;
+            shortcutsGrid.appendChild(item);
+        });
+        lucide.createIcons();
+    };
+
+    // Initial setup
+    window.onload = () => {
+        renderShortcuts();
+        // Start the combined refresh loop
+        updateSystemInfo(); 
+        lucide.createIcons();
+    };
+    
+    // Optional: Listen for network changes to update immediately
+    window.addEventListener('online', updateSystemInfo);
+    window.addEventListener('offline', updateSystemInfo);
+
+</script>
+
+</body>
+</html>
