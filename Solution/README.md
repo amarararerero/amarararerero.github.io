@@ -47,7 +47,7 @@ Save your project to apply the new connection settings.
 ---
 
 ## 🧩 Issue 2: Incomplete Dependencies / Package Components
-![Screenshot illustrating missing components](image.png)
+![Screenshot illustrating missing components](image-2.png)
 
 ### 🛠️ Resolution Steps
 
