@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>John Calc V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-hidden { transform: translateX(100%); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-[#121212] text-white h-screen flex flex-col overflow-hidden leading-tight">
+
+    <header class="p-5 bg-[#1e1e1e] border-b border-gray-800 shadow-xl">
+        <div class="flex justify-between items-center max-w-5xl mx-auto">
+            <div>
+                <p class="text-gray-500 text-[10px] uppercase font-black tracking-[0.2em] mb-1">Total Bill</p>
+                <h1 id="total-display" class="text-4xl font-black text-green-400">RM 0.00</h1>
+            </div>
+            <button onclick="toggleSidebar()" class="bg-white text-black px-6 py-3 rounded-2xl font-black text-sm uppercase shadow-lg active:scale-95 transition-all">
+                Details 🧾
+            </button>
+        </div>
+    </header>
+
+    <div class="h-[2px] bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+
+    <main class="flex-grow overflow-y-auto p-4 no-scrollbar">
+        <div id="menu-container" class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
+            </div>
+    </main>
+
+    <aside id="sidebar" class="fixed top-0 right-0 h-full w-[70%] sm:w-80 bg-[#1e1e1e] shadow-2xl z-30 sidebar-hidden flex flex-col border-l border-gray-800">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#252525]">
+            <h2 class="text-xl font-black uppercase tracking-tighter">Order</h2>
+            <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all active:scale-90">
+                <span class="text-2xl font-bold">&times;</span>
+            </button>
+        </div>
+        
+        <div id="cart-list" class="flex-grow p-4 space-y-4 overflow-y-auto no-scrollbar">
+            </div>
+
+        <div class="p-6 border-t border-gray-800 bg-[#121212]">
+            <button onclick="clearCart()" class="w-full py-3 rounded-xl border border-red-900/50 bg-red-500/10 text-red-500 font-bold text-xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition">Clear All</button>
+        </div>
+    </aside>
+
+    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-20"></div>
+
+    <script>
+        // Updated JSON Data (Prices +1.00)
+        const menuData = [
+            { "id": 1,  "name": "J Ayam",           "price": 12.0, "color": "#99485A" },
+            { "id": 2,  "name": "J Daging",         "price": 12.0, "color": "#99485A" },
+            { "id": -1, "name": "-",                "price": null, "color": "#2E2E2E" },
+            { "id": 3,  "name": "J Special Ayam",   "price": 15.0, "color": "#B8860B" },
+            { "id": 4,  "name": "J Special Daging", "price": 15.0, "color": "#B8860B" },
+            { "id": -1, "name": "J Special Kambing","price": 28.0, "color": "#B8860B" },
+            { "id": 6,  "name": "J Ust Ayam",       "price": 15.0, "color": "#7A5A9C" },
+            { "id": 7,  "name": "J Ust Daging",     "price": 15.0, "color": "#7A5A9C" },
+            { "id": 8,  "name": "J Ust Kambing",    "price": 29.0, "color": "#7A5A9C" },
+            { "id": 9,  "name": "J Grill Ayam",     "price": 14.0, "color": "#A68C3D" },
+            { "id": 10, "name": "J Grill Daging",   "price": 14.0, "color": "#A68C3D" },
+            { "id": 11, "name": "J Grill Kambing",  "price": 26.0, "color": "#A68C3D" },
+            { "id": 12, "name": "J Oblong Ayam",    "price": 13.0, "color": "#B97A59" },
+            { "id": 13, "name": "J Oblong Daging",  "price": 13.0, "color": "#B97A59" },
+            { "id": 14, "name": "J Oblong Kambing", "price": 16.0, "color": "#B97A59" },
+            { "id": 15, "name": "J Tuna",           "price": 14.0, "color": "#7865A8" },
+            { "id": 16, "name": "J Seafood",        "price": 14.0, "color": "#7865A8" },
+            { "id": 17, "name": "J Sardin",         "price": 12.0, "color": "#7865A8" },
+            { "id": 18, "name": "J Ayam Goreng",    "price": 14.0, "color": "#9C5B5B" },
+            { "id": 19, "name": "J BMT",            "price": 18.0, "color": "#9C5B5B" },
+            { "id": 20, "name": "J MeatBall",       "price": 14.0, "color": "#9C5B5B" },
+            { "id": 21, "name": "J Jujumbo",        "price": 14.0, "color": "#5A9C87" },
+            { "id": 22, "name": "J Triple Cheese",  "price": 23.0, "color": "#5A9C87" },
+            { "id": -1, "name": "-",                "price": null, "color": "#2E2E2E" },
+            { "id": -1, "name": "Tambah Telur",     "price": 3.0,  "color": "#5A9C87" },
+            { "id": -1, "name": "Tambah Sosej",     "price": 4.0,  "color": "#5A9C87" },
+            { "id": -1, "name": "-",                "price": null, "color": "#2E2E2E" }
+        ];
+
+
+        let cart = [];
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = menuData.map((item, index) => {
+                const isPlaceholder = item.id === -1;
+                return `
+                    <button 
+                        ${isPlaceholder ? 'disabled' : `onclick="addToCart(${index})"`}
+                        style="background-color: ${item.color}"
+                        class="h-28 p-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-md transition-all active:scale-95 ${isPlaceholder ? 'opacity-20 cursor-default' : 'hover:brightness-125 hover:shadow-2xl'}"
+                    >
+                        <span class="text-m font-black uppercase tracking-wide mb-2">${item.name}</span>
+                        ${item.price ? `<span class="text-s font-bold bg-black/20 px-2 py-0.5 rounded-full">RM${item.price.toFixed(1)}</span>` : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function addToCart(index) {
+            const item = menuData[index];
+            const existing = cart.find(c => c.name === item.name);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+            updateUI();
+        }
+
+        function removeFromCart(cartIndex) {
+            if (cart[cartIndex].qty > 1) {
+                cart[cartIndex].qty--;
+            } else {
+                cart.splice(cartIndex, 1);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            const cartList = document.getElementById('cart-list');
+            const totalDisplay = document.getElementById('total-display');
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartList.innerHTML = '<div class="text-center mt-10 opacity-30 font-black uppercase text-xs tracking-[0.3em]">No Items</div>';
+            } else {
+                cartList.innerHTML = cart.map((item, index) => {
+                    const subtotal = item.price * item.qty;
+                    total += subtotal;
+                    return `
+                        <div class="flex justify-between items-center bg-[#252525] p-4 rounded-2xl border border-gray-800 shadow-sm border-l-4" style="border-color: ${item.color}">
+                            <div class="flex flex-col">
+                                <span class="font-black text-sm uppercase tracking-normal">${item.name}</span>
+                                <span class="text-[12px] text-white-400 font-bold uppercase tracking-widest mt-1">RM${item.price.toFixed(2)} × ${item.qty}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-green-400 text-base">RM${subtotal.toFixed(2)}</span>
+                                <button onclick="removeFromCart(${index})" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all active:scale-90 font-bold">
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            totalDisplay.innerText = `RM ${total.toFixed(2)}`;
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-hidden');
+            document.getElementById('overlay').classList.toggle('hidden');
+        }
+
+        function clearCart() {
+            if (cart.length > 0) {
+                cart = [];
+                updateUI();
+            }
+            toggleSidebar();
+        }
+
+        // Initialize App
+        renderMenu();
+    </script>
+</body>
+</html>
