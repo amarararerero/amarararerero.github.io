@@ -91,14 +91,21 @@
             const container = document.getElementById('menu-container');
             container.innerHTML = menuData.map((item, index) => {
                 const isPlaceholder = item.id === -1;
+                
+                // Logic to find if the item is already in the cart
+                const cartItem = cart.find(c => c.name === item.name);
+                const quantity = cartItem ? cartItem.qty : 0;
+
                 return `
                     <button 
                         ${isPlaceholder ? 'disabled' : `onclick="addToCart(${index})"`}
                         style="background-color: ${item.color}"
                         class="h-28 p-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-md transition-all active:scale-95 ${isPlaceholder ? 'opacity-20 cursor-default' : 'hover:brightness-125 hover:shadow-2xl'}"
                     >
-                        <span class="text-m font-black uppercase tracking-wide mb-2">${item.name}</span>
-                        ${item.price ? `<span class="text-s font-bold bg-black/20 px-2 py-0.5 rounded-full">RM${item.price.toFixed(1)}</span>` : ''}
+                        <span class="text-m font-black uppercase tracking-wide mb-1">${item.name}</span>
+                        ${item.price ? `<span class="text-s font-bold bg-black/20 px-2 py-0.5 rounded-full mb-1">RM${item.price.toFixed(1)}</span>` : ''}
+                        
+                        ${quantity > 0 ? `<span class="text-[10px] font-black bg-white text-black px-2 rounded-md">QTY: ${quantity}</span>` : ''}
                     </button>
                 `;
             }).join('');
