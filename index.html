@@ -120,6 +120,7 @@
                 cart.push({ ...item, qty: 1 });
             }
             updateUI();
+            renderMenu();
         }
 
         function removeFromCart(cartIndex) {
@@ -129,6 +130,7 @@
                 cart.splice(cartIndex, 1);
             }
             updateUI();
+            renderMenu();
         }
 
         function updateUI() {
@@ -170,6 +172,7 @@
             if (cart.length > 0) {
                 cart = [];
                 updateUI();
+                renderMenu();
             }
             toggleSidebar();
         }
